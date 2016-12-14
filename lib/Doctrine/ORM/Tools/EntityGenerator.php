@@ -267,7 +267,7 @@ public function <methodName>(<methodTypeHint>$<variableName><variableDefault>)
  */
 public function <methodName>(<methodTypeHint>$<variableName>)
 {
-<spaces>$this-><fieldName>[] = $<variableName>;
+<spaces>$this-><fieldName>->add($<variableName>);
 
 <spaces>return $this;
 }';
@@ -281,11 +281,13 @@ public function <methodName>(<methodTypeHint>$<variableName>)
  *
  * @param <variableType> $<variableName>
  *
- * @return boolean TRUE if this collection contained the specified element, FALSE otherwise.
+ * @return <entity>
  */
 public function <methodName>(<methodTypeHint>$<variableName>)
 {
-<spaces>return $this-><fieldName>->removeElement($<variableName>);
+<spaces>$this-><fieldName>->removeElement($<variableName>);
+
+<spaces>return $this;
 }';
 
     /**
@@ -1379,6 +1381,12 @@ public function __construct(<params>)
         if ($typeHint && ! isset($types[$typeHint])) {
             $variableType   =  '\\' . ltrim($variableType, '\\');
             $methodTypeHint =  '\\' . $typeHint . ' ';
+        }
+
+        if ($typeHint == Collection::class) {
+            $fieldName = "{$fieldName} instanceof \\Doctrine\\Common\\Collections\\Collection ? \$this->{$fieldName} : new \\Doctrine\\Common\\Collections\\ArrayCollection()";
+        } elseif (in_array($type, array("add", "remove"))) {
+            $fieldName = sprintf('get%s()', ucfirst($fieldName));
         }
 
         $replacements = [
